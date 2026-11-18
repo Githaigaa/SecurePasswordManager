@@ -11,7 +11,7 @@
         <section id="auth" class="auth-shell">
             <div class="auth-card">
                 <div class="brand-mark">⌑</div>
-                <p class="eyebrow">PRIVATE BY DESIGN</p>
+                <p class="eyebrow">PRIVATE</p>
                 <h1 id="auth-title">Your passwords,<br /><span>under your control.</span></h1>
                 <p id="auth-copy" class="muted">Unlock your encrypted vault to continue.</p>
                 <form id="auth-form">
@@ -100,18 +100,12 @@
                     </div>
                     <div class="field full">
                         <label>Username or email</label
-                        ><input id="entry-username" autocomplete="username" placeholder="you@example.com" />
+                        ><input id="entry-username" type="password" autocomplete="off" placeholder="Username hidden while editing" />
                     </div>
                     <div class="field full">
                         <label>Password</label>
                         <div class="password-input">
-                            <input id="entry-password" type="password" required autocomplete="new-password" /><button
-                                type="button"
-                                class="icon-btn"
-                                data-toggle="entry-password"
-                            >
-                                ◉</button
-                            ><button type="button" id="make-password" class="text-btn">Generate</button>
+                            <input id="entry-password" type="password" required autocomplete="new-password" /><button type="button" id="make-password" class="text-btn">Generate</button>
                         </div>
                         <div id="strength" class="strength-line"></div>
                     </div>
