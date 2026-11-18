@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="theme-color" content="#0b1020" />
+        <title>Keychain — Password Manager</title>
+        <link rel="stylesheet" href="/style.css" />
+    </head>
+    <body>
+        <section id="auth" class="auth-shell">
+            <div class="auth-card">
+                <div class="brand-mark">⌑</div>
+                <p class="eyebrow">PRIVATE BY DESIGN</p>
+                <h1 id="auth-title">Your passwords,<br /><span>under your control.</span></h1>
+                <p id="auth-copy" class="muted">Unlock your encrypted vault to continue.</p>
+                <form id="auth-form">
+                    <label for="master">Master password</label>
+                    <div class="password-input">
+                        <input
+                            id="master"
+                            type="password"
+                            autocomplete="current-password"
+                            required
+                            minlength="8"
+                            autofocus
+                        /><button type="button" class="icon-btn" data-toggle="master">◉</button>
+                    </div>
+                    <div id="confirm-wrap" class="hidden">
+                        <label for="confirm">Confirm master password</label
+                        ><input id="confirm" type="password" autocomplete="new-password" minlength="8" />
+                    </div>
+                    <p id="auth-error" class="error"></p>
+                    <button id="auth-submit" class="btn primary wide">Unlock vault <span>→</span></button>
+                </form>
+                <p class="fineprint">
+                    Your master password is never stored. Keep it somewhere safe; it cannot be recovered.
+                </p>
+                <div class="security-note"><span class="dot"></span> AES-GCM encrypted · Local vault</div>
+            </div>
+        </section>
+        <div id="app" class="app hidden">
+            <aside class="sidebar">
+                <div class="brand">
+                    <div class="brand-mark small">⌑</div>
+                    <div><b>keychain</b><small>PERSONAL VAULT</small></div>
+                </div>
+                <div class="profile">
+                    <div class="avatar">JD</div>
+                    <div>
+                        <b>Personal vault</b><small><i class="dot"></i> Unlocked</small>
+                    </div>
+                    <button id="lock" class="icon-btn" title="Lock vault">↪</button>
+                </div>
+                <div class="nav-label">WORKSPACE</div>
+                <nav id="nav">
+                    <button data-page="dashboard" class="active"><span>⌂</span> Dashboard</button
+                    ><button data-page="vault"><span>▤</span> Password vault <em id="nav-count">0</em></button
+                    ><button data-page="favorites"><span>☆</span> Favorites</button
+                    ><button data-page="generator"><span>⚄</span> Password generator</button
+                    ><button data-page="security"><span>◈</span> Security center</button>
+                </nav>
+                <div class="nav-label bottom-label">PREFERENCES</div>
+                <nav>
+                    <button data-page="settings"><span>⚙</span> Settings</button>
+                </nav>
+                <div class="sidebar-foot">
+                    <span class="shield">✓</span>
+                    <div><b>Your vault is private</b><small>Encrypted on this device</small></div>
+                </div>
+            </aside>
+            <main class="main">
+                <header class="topbar">
+                    <div class="crumb">My vault <span>/</span> <b id="page-name">Dashboard</b></div>
+                    <div class="top-actions">
+                        <button class="icon-btn" title="Notifications">♧</button>
+                        <div class="avatar tiny">JD</div>
+                    </div>
+                </header>
+                <div class="content"><div id="view"></div></div>
+            </main>
+        </div>
+        <div id="toast" class="toast"></div>
+        <dialog id="editor" class="modal">
+            <form id="credential-form" method="dialog">
+                <div class="modal-head">
+                    <div>
+                        <p class="eyebrow">VAULT ENTRY</p>
+                        <h2 id="modal-title">Add a password</h2>
+                    </div>
+                    <button type="button" class="icon-btn" data-close>×</button>
+                </div>
+                <input type="hidden" id="entry-id" />
+                <div class="form-grid">
+                    <div class="field full">
+                        <label>Service name</label><input id="entry-name" required placeholder="e.g. Acme Workspace" />
+                    </div>
+                    <div class="field full">
+                        <label>Website URL</label><input id="entry-url" required placeholder="https://example.com" />
+                    </div>
+                    <div class="field full">
+                        <label>Username or email</label
+                        ><input id="entry-username" autocomplete="username" placeholder="you@example.com" />
+                    </div>
+                    <div class="field full">
+                        <label>Password</label>
+                        <div class="password-input">
+                            <input id="entry-password" type="password" required autocomplete="new-password" /><button
+                                type="button"
+                                class="icon-btn"
+                                data-toggle="entry-password"
+                            >
+                                ◉</button
+                            ><button type="button" id="make-password" class="text-btn">Generate</button>
+                        </div>
+                        <div id="strength" class="strength-line"></div>
+                    </div>
+                    <div class="field">
+                        <label>Category</label
+                        ><select id="entry-category">
+                            <option>Social Media</option>
+                            <option>Banking</option>
+                            <option>Email</option>
+                            <option>Work</option>
+                            <option>Shopping</option>
+                            <option>Entertainment</option>
+                            <option>Development</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label class="checkline"><input id="entry-favorite" type="checkbox" /> Add to favorites</label>
+                    </div>
+                    <div class="field full">
+                        <label>Notes <span class="muted">(optional)</span></label
+                        ><textarea id="entry-notes" rows="3" placeholder="Helpful details for this login"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn ghost" data-close>Cancel</button
+                    ><button class="btn primary">Save entry</button>
+                </div>
+            </form>
+        </dialog>
+        <dialog id="confirm" class="modal confirm-modal">
+            <div class="modal-head">
+                <div>
+                    <p class="eyebrow">REMOVE ENTRY</p>
+                    <h2>Delete this password?</h2>
+                </div>
+                <button type="button" class="icon-btn" data-close>×</button>
+            </div>
+            <p class="muted">This entry will be permanently removed from your encrypted vault.</p>
+            <div class="modal-actions">
+                <button class="btn ghost" data-close>Cancel</button
+                ><button id="confirm-delete" class="btn danger">Delete entry</button>
+            </div>
+        </dialog>
+        <script src="/app.js"></script>
+    </body>
+</html>

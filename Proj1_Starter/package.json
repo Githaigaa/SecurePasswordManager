@@ -4,7 +4,8 @@
   "description": "",
   "main": "password-manager.js",
   "scripts": {
-    "test": "mocha"
+    "test": "node node_modules/mocha/bin/mocha",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",

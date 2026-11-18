@@ -8,12 +8,15 @@ const { subtle } = require('crypto').webcrypto;
 /********* Constants ********/
 
 const PBKDF2_ITERATIONS = 100000; // number of iterations for PBKDF2 algorithm
-const MAX_PASSWORD_LENGTH = 64;   // we can assume no password is longer than this many characters
+const MAX_PASSWORD_LENGTH = 64;   // retained for legacy-format documentation
 
 // Every plaintext is padded to exactly this many bytes before encryption, so all
 // ciphertexts have the same length. A JS string of 64 UTF-16 code units is at most
 // 192 bytes in UTF-8, so 256 bytes leaves room for a 1-byte length prefix.
-const PADDED_SIZE = MAX_PASSWORD_LENGTH * 4;
+// New records use a larger fixed-size payload for structured credential data.
+// unpad() remains compatible with the original 256-byte records.
+const LEGACY_PADDED_SIZE = MAX_PASSWORD_LENGTH * 4;
+const PADDED_SIZE = 4096;
 
 const SALT_LENGTH = 16; // 128-bit salt
 const IV_LENGTH = 12;   // 96-bit IV, the recommended size for AES-GCM
@@ -60,26 +63,31 @@ async function deriveKeys(password, salt) {
   return { domainKey, aesKey };
 }
 
-/** Pads a string to PADDED_SIZE bytes: [1-byte length][data][zero padding]. */
+/** Pads new values to a fixed size: [4-byte length][data][zero padding]. */
 function pad(str) {
   const bytes = stringToBuffer(str);
-  if (bytes.length > PADDED_SIZE - 1 || str.length > MAX_PASSWORD_LENGTH) {
+  if (bytes.length > PADDED_SIZE - 4) {
     throw "Value is too long!";
   }
   const out = new Uint8Array(PADDED_SIZE); // zero-filled
-  out[0] = bytes.length;
-  out.set(bytes, 1);
+  new DataView(out.buffer).setUint32(0, bytes.length);
+  out.set(bytes, 4);
   return out;
 }
 
 /** Inverse of pad(). */
 function unpad(buf) {
   const arr = new Uint8Array(buf);
-  const len = arr[0];
-  if (arr.length !== PADDED_SIZE || len > PADDED_SIZE - 1) {
+  if (arr.length === LEGACY_PADDED_SIZE) {
+    const len = arr[0];
+    if (len > LEGACY_PADDED_SIZE - 1) throw TAMPER_MSG;
+    return bufferToString(arr.slice(1, 1 + len));
+  }
+  const len = arr.length === PADDED_SIZE ? new DataView(arr.buffer, arr.byteOffset, arr.byteLength).getUint32(0) : PADDED_SIZE;
+  if (arr.length !== PADDED_SIZE || len > PADDED_SIZE - 4) {
     throw TAMPER_MSG;
   }
-  return bufferToString(arr.slice(1, 1 + len));
+  return bufferToString(arr.slice(4, 4 + len));
 }
 
 /********* Implementation ********/
