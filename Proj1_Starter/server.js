@@ -162,7 +162,7 @@ const server = http.createServer(async (req, res) => {
     const file = path.resolve(STATIC, requested);
     if (!file.startsWith(path.resolve(STATIC) + path.sep)) return send(res, 403, { error: "Forbidden" });
     const content = await fs.readFile(file);
-    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8" };
+    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".png": "image/png" };
     res.writeHead(200, { "Content-Type": types[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
     res.end(content);
   } catch (error) {
