@@ -1,30 +1,32 @@
 # Keychain Password Manager
 
-## Run the application
+Keychain is an educational password manager built with Node.js. It combines the project's cryptographic keychain library with a local browser interface for saving and organizing account credentials. The app is intended for coursework and demonstration, not as a replacement for a production password manager.
 
-From `Proj1_Starter`, run:
+## How it works
+
+- **Master password and keys:** A random salt and PBKDF2 with SHA-256 derive a master key. HMAC derives separate keys for domain indexing and encryption; the master password and keys are not written to the vault.
+- **Encrypted records:** Each credential is serialized and saved through `Keychain.set`. The domain identifier is HMAC-indexed, and the value is encrypted with AES-GCM using a fresh random IV. The HMAC index is also authenticated as additional data, so moving a ciphertext to a different index causes decryption to fail.
+- **Length padding:** The Keychain pads each value to a fixed size before encryption. The UI stores a structured credential as one encrypted value, so the implementation uses a larger 4096-byte padded record for new entries and can still read the original 256-byte records.
+- **Backup and integrity:** `dump()` serializes the encrypted vault and returns a SHA-256 checksum. The app saves the encrypted dump locally and can export or restore it. For rollback protection, a trusted copy of the checksum must be kept separately; a checksum stored beside the dump can be replaced along with it.
+
+## Interface features
+
+The local web UI includes a dashboard, password vault, favorites, secure password generator, security center, and settings. Credentials can be added, edited, searched, sorted, filtered, copied, and deleted. Passwords and usernames are masked in the vault list. The generator uses Node.js `crypto.randomInt`; security scores and password-strength labels are local estimates, not breach monitoring or guarantees of safety.
+
+The Node server keeps the unlocked Keychain and decrypted records in memory. It writes only the encrypted dump to `.keychain-vault.json`. The vault locks after 15 minutes of inactivity or when you select **Lock vault**.
+
+## Run it
+
+From the `Proj1_Starter` directory:
 
 ```powershell
 npm start
 ```
 
-Then open [http://127.0.0.1:4173](http://127.0.0.1:4173). The server binds to loopback only. The first visit lets you create a master password; later visits unlock the vault. The vault locks after 15 minutes without an API request, or immediately with the lock button.
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The first visit creates a vault; later visits ask for its master password. Keep the terminal running while using the app.
 
-## What is included
+Run the existing cryptography tests from the same directory with:
 
-- A responsive dark UI for dashboard, vault, favorites, generator, security center, and settings.
-- Credential add, edit, delete, search, category filtering, sorting, password reveal, and copy actions.
-- Cryptographically secure password generation using Node.js `crypto.randomInt`.
-- Local security insights for strength, duplicates, and completeness. No breach or threat checks are claimed.
-- Encrypted JSON backup export and restore with the Keychain checksum verification.
-- A local Node bridge that keeps the Keychain object, derived keys, and decrypted values in process memory. Only `dump()` output is persisted in `.keychain-vault.json`; that file is ignored by git.
-
-## Storage format note
-
-The starter Keychain allowed only short values, which cannot hold structured credentials. New encrypted records use a larger fixed-size padded payload. The loader still reads the original 256-byte padded records, so existing starter vault data remains readable. PBKDF2, AES-GCM, HMAC indexing, and dump checksums remain in the original Keychain implementation.
-
-The vault file is encrypted, but a backup can be unlocked by anyone who also knows the master password. Store backups carefully. The application is a local project UI, not a packaged desktop application; closing the Node process clears the in-memory keychain and requires unlocking again.
-
-## Tests
-
-Run the existing starter suite from `Proj1_Starter` with `npm test`.
+```powershell
+npm test
+```
